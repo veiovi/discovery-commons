@@ -4,9 +4,9 @@ test("transport, repeated controls, seed, filters, lineage and policies", async 
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
+  await page.goto("/?autoplay=0&intro=0");
   await expect(
-    page.getByRole("heading", { name: "Many questions." }),
+    page.getByRole("heading", { name: "Everyone gets a lab." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Step", exact: true }).click();
   await expect(page.locator("#tick")).toHaveText("Tick 001");
@@ -48,7 +48,7 @@ test("transport, repeated controls, seed, filters, lineage and policies", async 
 });
 test("desktop screenshot and evidence narrative", async ({ page }) => {
   await page.setViewportSize({ width: 1512, height: 1100 });
-  await page.goto("/");
+  await page.goto("/?autoplay=0&intro=0");
   for (let i = 0; i < 40; i++)
     await page.getByRole("button", { name: "Step", exact: true }).click();
   await page.locator(".claim-row").nth(12).click();
@@ -68,6 +68,8 @@ test("mobile and reduced motion preserve controls without page overflow", async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await expect(page.locator(".intro-film")).toHaveCount(0);
+  await expect(page.locator("#tick")).toHaveText("Tick 000");
   await page
     .getByRole("button", { name: "Play simulation", exact: true })
     .click();
@@ -89,4 +91,23 @@ test("mobile and reduced motion preserve controls without page overflow", async 
   ).toBe(true);
   await page.locator("#policy").focus();
   await expect(page.locator("#policy")).toBeFocused();
+});
+test("visitors see it run: intro, autoplay, celebrations and URL flags", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(page.locator(".intro-film")).toHaveCount(1);
+  await expect(page.locator(".intro-film")).toHaveCount(0, { timeout: 5000 });
+  await expect(page.locator("#run-status")).toHaveText("Running");
+  await page.goto("/?autoplay=1&speed=4&intro=0&embed=1&seed=7");
+  await expect(page.locator("header")).toBeHidden();
+  await expect(page.locator("#speed")).toHaveValue("4");
+  await expect(page.locator("#network")).toContainText("seed 7");
+  await expect(page.locator("#toast")).toContainText(/held up|Breakthrough/, {
+    timeout: 15000,
+  });
+  await expect(page.locator(".role-total").first()).toContainText("Explorers");
+  expect(errors).toEqual([]);
 });

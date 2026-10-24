@@ -9,6 +9,8 @@ import {
   metrics,
   presets,
   people,
+  roles,
+  roleTotals,
   type State,
 } from "../src/engine";
 function run(s = createState(), ticks = 160) {
@@ -93,7 +95,8 @@ test("positive rewards are delayed; failed checks only earn negative-finding cre
     const c = s.claims.find((c) => c.id === p.claim)!;
     if (p.role === "negative finding") {
       assert.ok(["rejected", "challenged"].includes(c.status));
-      assert.equal(p.amount, 3);
+      // A full 3 credits unless this payment emptied the fund.
+      assert.ok(p.amount === 3 || (p.amount < 3 && s.remaining === 0));
     } else {
       assert.equal(c.status, "confirmed");
       assert.ok(p.tick >= (c.until ?? 0));
@@ -165,4 +168,24 @@ test("finished runs cannot restart or award twice", () => {
   assert.equal(s.exhausted, true);
   assert.equal(setRunning(s, true).running, false);
   assert.deepEqual(run(s, 50), s);
+});
+test("Explorers and Makers submit, Verifiers take most checks, and all three roles earn", () => {
+  const s = run(createState(2048, presets["Open exploration"]), 600);
+  for (const c of s.claims) {
+    assert.notEqual(roles[c.author], "verifier");
+    assert.equal(c.kind, roles[c.author] === "maker" ? "tool" : "finding");
+  }
+  const checks = s.claims.flatMap((c) => c.checks);
+  const byVerifiers = checks.filter((x) => roles[x.verifier] === "verifier");
+  assert.ok(byVerifiers.length / checks.length > 0.6);
+  const totals = roleTotals(s);
+  assert.ok(totals.explorer > 0 && totals.maker > 0 && totals.verifier > 0);
+  assert.equal(
+    totals.explorer + totals.maker + totals.verifier,
+    s.initialBudget - s.remaining,
+  );
+});
+test("originator-only policy leaves Verifiers without credit", () => {
+  const s = run(createState(2048, presets["Fast & fragile"]), 600);
+  assert.equal(roleTotals(s).verifier, 0);
 });
