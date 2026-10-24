@@ -1,0 +1,22 @@
+{
+  "name": "discovery-commons-explainer",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Explainer out/raw.mp4 --codec h264 --crf 18 && ffmpeg -y -loglevel error -i out/raw.mp4 -c:v copy -af loudnorm=I=-16:TP=-1.5:LRA=11 -c:a aac -b:a 192k -movflags +faststart out/discovery-commons-explainer.mp4",
+    "still": "remotion still src/index.ts Explainer out/still.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.537",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.537"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "^6.0.3"
+  }
+}

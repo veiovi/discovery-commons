@@ -55,6 +55,20 @@ export const people = [
   "Bo",
   "Ari",
 ];
+export type Role = "explorer" | "maker" | "verifier";
+/** Four people per role, in display order: Explorers, Makers, Verifiers. */
+export const roles: Role[] = people.map((_, i) =>
+  i < 4 ? "explorer" : i < 8 ? "maker" : "verifier",
+);
+export const roleNames: Record<Role, string> = {
+  explorer: "Explorer",
+  maker: "Maker",
+  verifier: "Verifier",
+};
+/** Explorers and Makers submit claims; Verifiers check them. */
+export const contributors = people
+  .map((_, i) => i)
+  .filter((i) => roles[i] !== "verifier");
 export const domains = [
   "Energy",
   "Materials",
@@ -72,6 +86,8 @@ export type Check = {
 export type Claim = {
   id: number;
   author: number;
+  /** A finding (from an Explorer) or a tool, dataset or method (from a Maker). */
+  kind: "finding" | "tool";
   topic: number;
   assertion: boolean;
   truth: boolean;
@@ -119,6 +135,8 @@ export type State = {
 };
 export const SUBMISSION_END = 90;
 export const MAX_TICKS = 600;
+/** Chance that a check goes to a free Verifier rather than any eligible person. */
+export const VERIFIER_SHARE = 0.8;
 const bounded = (n: number, min: number, max: number) =>
   Math.min(max, Math.max(min, Number.isFinite(n) ? n : min));
 export function normalize(c: Config): Config {
@@ -231,7 +249,11 @@ function reward(s: State, c: Claim) {
 function check(s: State, c: Claim, kind: Check["kind"]) {
   const used = new Set([c.author, ...c.checks.map((x) => x.verifier)]);
   const eligible = people.map((_, i) => i).filter((i) => !used.has(i));
-  const verifier = eligible[Math.floor(random(s) * eligible.length)];
+  // Verifiers take most checks; anyone else other than the author can step in.
+  const specialists = eligible.filter((i) => roles[i] === "verifier");
+  const pool =
+    specialists.length && random(s) < VERIFIER_SHARE ? specialists : eligible;
+  const verifier = pool[Math.floor(random(s) * pool.length)];
   // Hidden truth generates observations; it never directly decides acceptance.
   const correct = c.assertion === c.truth;
   const falseSignal =
@@ -288,7 +310,7 @@ export function step(input: State, force = false): State {
   }
   if (s.tick <= SUBMISSION_END) {
     for (let i = 0; i < 2; i++) {
-      const author = Math.floor(random(s) * people.length);
+      const author = contributors[Math.floor(random(s) * contributors.length)];
       const explore = random(s) < s.config.diversity / 100;
       const topic = explore
         ? Math.floor(random(s) * 24)
@@ -304,6 +326,7 @@ export function step(input: State, force = false): State {
       s.claims.push({
         id: ++s.submitted,
         author,
+        kind: roles[author] === "maker" ? "tool" : "finding",
         topic,
         assertion,
         truth: s.world[topic],
@@ -349,6 +372,12 @@ export function metrics(s: State) {
     paid: s.initialBudget - s.remaining,
     checks: s.checks,
   };
+}
+/** Credits earned by each role so far. */
+export function roleTotals(s: State): Record<Role, number> {
+  const totals: Record<Role, number> = { explorer: 0, maker: 0, verifier: 0 };
+  s.balances.forEach((b, i) => (totals[roles[i]] += b));
+  return totals;
 }
 export function title(c: Claim) {
   return `${domains[Math.floor(c.topic / 4)]} / hypothesis ${String(c.topic + 1).padStart(2, "0")}`;

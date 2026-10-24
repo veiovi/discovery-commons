@@ -6,9 +6,13 @@ These are invented simulation parameters, not empirical estimates. They are inte
 
 A 32-bit linear congruential generator advances as `x = (1664525*x + 1013904223) mod 2^32`, then returns `x/2^32`. The seed is coerced to an unsigned 32-bit integer. Initial truth for each of 24 fictional hypotheses is sampled as `U < 0.7`. It is fixed for the run. No cryptographic security is intended.
 
-Every tick processes up to `capacity` check operations, prioritizing mature challenges, then FIFO replication work. A single claim can consume multiple slots in one tick. Two new submissions arrive per tick through tick 90. Their author is sampled from twelve equally likely people; their agent direction is implicit in the sampled hypothesis. A run ends when submissions close and the queue drains, or at tick 600. Zero capacity therefore ends with unresolved claims. No unresolved claim is silently confirmed.
+Every tick processes up to `capacity` check operations, prioritizing mature challenges, then FIFO replication work. A single claim can consume multiple slots in one tick. Two new submissions arrive per tick through tick 90. A run ends when submissions close and the queue drains, or at tick 600. Zero capacity therefore ends with unresolved claims. No unresolved claim is silently confirmed.
 
 Diversity `d` means a `d/100` chance of sampling any of 24 topics; otherwise one of three fashionable topics is sampled. An honest submission flips the hidden truth with probability `noise/100`. A malicious submission always asserts its opposite. Malicious contributions occur with probability `malicious/100`; they also increase the chance of a misleading check signal under weak rigor. This is an aggregate adversarial proxy, not a sybil, plagiarism or collusion detector.
+
+## Roles and lineage
+
+The twelve people have fixed roles: Ada, Noor, Ivo and Mika are Explorers; Sol, Eli, Ren and Luz are Makers; Kit, Uma, Bo and Ari are Verifiers. A submission's author is sampled uniformly from the eight Explorers and Makers. An Explorer's claim is a *finding*; a Maker's claim is a *tool* (a method, dataset or instrument whose result bears on the hypothesis). Both kinds follow identical evidence, verification and credit rules; the kind changes only how the claim is described and drawn. Agent direction is implicit in the sampled hypothesis.
 
 A precursor is the latest earlier submission on the same topic, regardless of validity or polarity. This is an intentionally simplistic attribution rule that can reward poor precursors. It is not evidence of causal contribution. The graph is acyclic because parents always have lower IDs. The UI lets users traverse the direct-parent chain.
 
@@ -16,7 +20,7 @@ A precursor is the latest earlier submission on the same topic, regardless of va
 
 Each claim snapshots rigor `r` and reward policy when submitted. Replications required: `1 + floor(r/30)` (1–4 over the slider range). Every required observation must pass. A failed check immediately rejects the claim. This is a conjunction of observations, not a vote or posterior probability.
 
-Verifiers are randomly selected without replacement from contributors other than the author. A different verifier checks the challenge. Unique identities stand in for independence; they do not guarantee separate data, software, methods or institutions in reality. Reused precursors can have authored earlier claims, including by the same originator.
+Each check first draws whether it goes to a specialist: with probability 0.8, and if any Verifier who has not yet checked the claim remains, a Verifier is chosen uniformly from them. Otherwise anyone who is neither the author nor a previous checker of the claim is chosen uniformly. Checkers are therefore never repeated within a claim, and a different person checks the challenge. Verifiers do most checks, but Explorers and Makers also step in, particularly for claims that need four replications plus a challenge. Unique identities stand in for independence; they do not guarantee separate data, software, methods or institutions in reality. Reused precursors can have authored earlier claims, including by the same originator.
 
 If an assertion agrees with hidden truth, a check passes with probability:
 
@@ -32,7 +36,7 @@ After successful replications, a claim becomes provisional until `current tick +
 
 ## Credit and accounting
 
-Novelty is true for the first **confirmed** claim with a given topic and assertion polarity. Thus there are at most 48 novelty slots, including potentially incorrect claims. Requested reward: 40 credits for novel confirmation, 12 for repeat confirmation. Later evidence does not revoke already paid credits in v1. False positives can be paid because the verifier does not consult the audit oracle.
+Novelty is true for the first **confirmed** claim with a given topic and assertion polarity. Thus there are at most 48 novelty slots, including potentially incorrect claims. Requested reward: 40 credits for novel confirmation, 12 for repeat confirmation. Later evidence does not revoke already paid credits. False positives can be paid because the verifier does not consult the audit oracle.
 
 Shared lineage weights:
 
@@ -42,7 +46,7 @@ Shared lineage weights:
 
 Weights are normalized over available recipients; without a precursor, the 50 and 30 weights sum to 80. They are not always literal percentages. If the same person has multiple roles, their payments aggregate. Each role except the last receives a floored integer share; the last receives the remainder. This rounding creates a small ordering bias, documented rather than disguised.
 
-Under originator-only policy, 100% goes to the originator. Under shared policy, a failed replication or challenge requests 3 credits for its verifier as a negative finding. This can pay for mistaken rejection; there is no truth-oracle veto. There is no negative-finding reward under originator-only policy.
+Under originator-only policy, 100% goes to the originator. Because Verifiers never author claims, they earn nothing under this policy. Under shared policy, a failed replication or challenge requests 3 credits for its verifier as a negative finding. This can pay for mistaken rejection; there is no truth-oracle veto. There is no negative-finding reward under originator-only policy.
 
 Every award is `min(requested amount, remaining fund)`. Total requested parts are apportioned to that capped award. The initial 1,200-credit fund is conserved exactly:
 
@@ -56,6 +60,6 @@ Capacity changes processing immediately. Diversity/noise/malice changes future s
 
 Same seed plus the same sequence of controls and steps gives exact replay. Changes that alter check processing also change PRNG consumption, so comparisons are not matched causal trials. Use many seeds or independent random streams for serious policy comparison.
 
-Queue counts queued/checking claims; held counts provisional claims. Replications includes challenge observations, and therefore is a check-operation count. False positives counts confirmed assertions that contradict hidden truth, even if no budget remained to pay them. Coverage counts topics ever submitted. Novel advances counts model novelty, which can include false positives. The UI exposes the hidden-truth audit only as a demonstration diagnostic.
+Queue counts queued/checking claims; held counts provisional claims. Replications includes challenge observations, and therefore is a check-operation count. False positives counts confirmed assertions that contradict hidden truth, even if no budget remained to pay them. Coverage counts topics ever submitted. Role totals sum each role's balances and always equal total credits paid. Novel advances counts model novelty, which can include false positives. The UI exposes the hidden-truth audit only as a demonstration diagnostic.
 
 Not implemented: actual research agents, real protocols/data, scientific novelty search, correlated errors, identity checks, plagiarism detection, appeals, consent workflow, causal credit assignment, verification-cost accounting, external settlement, or durable provenance. The checks are not calibrated scientific probabilities.
