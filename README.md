@@ -1,8 +1,8 @@
 # Discovery Commons
 
-[![Watch the 49-second explainer](docs/media/explainer-poster.jpg)](video/README.md)
+[![Watch the 49-second explainer](docs/media/explainer-poster.jpg)](https://x.com/jayuhdinger/status/2113958774579065046)
 
-▶ **Watch the 49-second explainer.** It is made in code with [Remotion](https://www.remotion.dev); the source is in [`video/`](video/README.md).
+▶ **[Watch the 49-second explainer](https://x.com/jayuhdinger/status/2113958774579065046).** It is made in code with [Remotion](https://www.remotion.dev); the source is in [`video/`](video/README.md).
 
 **Everyone gets a lab.**
 
