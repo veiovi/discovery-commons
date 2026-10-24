@@ -113,7 +113,7 @@ Keep settlement replaceable behind a narrow interface. Build the evidence and go
 ## Working materials
 
 - Repository: https://github.com/veiovi/discovery-commons
-- Play it in a browser: https://jayuhdinger.com/projects/discovery-commons/?share=e8984dded3732e53e9db709f
+- Play it in a browser: https://drop4u.pages.dev/projects/discovery-commons/?share=e8984dded3732e53e9db709f
 - Run it locally: run `npm ci` and `npm run dev` in the repository, then open `http://127.0.0.1:5173`.
 - Repository documentation: `docs/model.md`, `docs/demo.md`, `docs/verification.md`.
 - Status: working simulation; the proposed real-world system remains speculative.
