@@ -20,11 +20,13 @@ People have different strengths, and every one of them counts:
 
 This repository is a playable simulation of that idea. Twelve fictional people (four of each role) explore twenty-four synthetic hypotheses. Watch claims flow into the Commons, get checked by independent Verifiers, wait out a challenge window and send gold credits back to everyone in the lineage.
 
-![Discovery Commons simulation](artifacts/discovery-commons-desktop.png)
+**[▶ Play it in your browser](https://jayuhdinger.com/projects/discovery-commons/?share=e8984dded3732e53e9db709f)**: nothing to install.
 
-## Play it in 30 seconds
+[![Discovery Commons simulation](artifacts/discovery-commons-desktop.png)](https://jayuhdinger.com/projects/discovery-commons/?share=e8984dded3732e53e9db709f)
 
-You need Node.js 22.12 or newer.
+## Play it
+
+Open the [hosted version](https://jayuhdinger.com/projects/discovery-commons/?share=e8984dded3732e53e9db709f), or run it yourself in 30 seconds. You need Node.js 22.12 or newer.
 
 ```sh
 git clone https://github.com/veiovi/discovery-commons
